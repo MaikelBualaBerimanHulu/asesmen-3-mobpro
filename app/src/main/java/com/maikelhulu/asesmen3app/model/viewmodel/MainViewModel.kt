@@ -1,10 +1,9 @@
-package com.maikelhulu.asesmen3app.viewmodel
+package com.maikelhulu.asesmen3app.model.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.maikelhulu.asesmen3app.database.AppDatabase
-import com.maikelhulu.asesmen3app.model.ApiItem
 import com.maikelhulu.asesmen3app.model.ApiStatus
 import com.maikelhulu.asesmen3app.model.Item
 import com.maikelhulu.asesmen3app.network.RetrofitInstance

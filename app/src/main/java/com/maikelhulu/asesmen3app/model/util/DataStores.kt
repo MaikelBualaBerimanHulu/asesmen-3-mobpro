@@ -1,4 +1,4 @@
-package com.maikelhulu.asesmen3app.util
+package com.maikelhulu.asesmen3app.model.util
 
 import android.content.Context
 import androidx.datastore.core.DataStore
