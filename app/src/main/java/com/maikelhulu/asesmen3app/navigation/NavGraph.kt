@@ -27,7 +27,7 @@ fun SetupNavGraph(navController: NavHostController) {
 
         // MAIN SHELL DENGAN BOTTOM NAV
         composable(route = Screen.Main.route) {
-            MainShell(navController = navController)
+            MainShell(rootNavController = navController)
         }
 
         // ADD ITEM SCREEN

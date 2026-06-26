@@ -15,12 +15,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost // Import eksplisit
 import androidx.navigation.compose.composable // Import eksplisit
-import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.maikelhulu.asesmen3app.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainShell(navController: NavHostController) {
+fun MainShell(rootNavController: NavHostController) {
+    val tabNavController = rememberNavController()
     var selectedTab by remember { mutableStateOf(Screen.Explore.route) }
 
     Scaffold(
@@ -32,8 +33,8 @@ fun MainShell(navController: NavHostController) {
                     selected = selectedTab == Screen.Explore.route,
                     onClick = {
                         selectedTab = Screen.Explore.route
-                        navController.navigate(Screen.Explore.route) {
-                            popUpTo(Screen.Main.route) { saveState = true }
+                        tabNavController.navigate(Screen.Explore.route) {
+                            popUpTo(Screen.Explore.route) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
                         }
@@ -44,10 +45,10 @@ fun MainShell(navController: NavHostController) {
 
                 NavigationBarItem(
                     selected = false,
-                    onClick = { navController.navigate(Screen.AddItem.route) },
+                    onClick = { rootNavController.navigate(Screen.AddItem.route) },
                     icon = {
                         FloatingActionButton(
-                            onClick = { navController.navigate(Screen.AddItem.route) },
+                            onClick = { rootNavController.navigate(Screen.AddItem.route) },
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             modifier = Modifier.size(64.dp)
                         ) {
@@ -61,8 +62,8 @@ fun MainShell(navController: NavHostController) {
                     selected = selectedTab == Screen.Collection.route,
                     onClick = {
                         selectedTab = Screen.Collection.route
-                        navController.navigate(Screen.Collection.route) {
-                            popUpTo(Screen.Main.route) { saveState = true }
+                        tabNavController.navigate(Screen.Collection.route) {
+                            popUpTo(Screen.Explore.route) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
                         }
@@ -75,8 +76,8 @@ fun MainShell(navController: NavHostController) {
                     selected = selectedTab == Screen.Profile.route,
                     onClick = {
                         selectedTab = Screen.Profile.route
-                        navController.navigate(Screen.Profile.route) {
-                            popUpTo(Screen.Main.route) { saveState = true }
+                        tabNavController.navigate(Screen.Profile.route) {
+                            popUpTo(Screen.Explore.route) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
                         }
@@ -89,16 +90,16 @@ fun MainShell(navController: NavHostController) {
     ) { paddingValues ->
         // Nested NavHost untuk tabs
         NavHost(
-            navController = navController,
+            navController = tabNavController,
             startDestination = Screen.Explore.route,
             modifier = Modifier.padding(paddingValues)
         ) {
-            composable(Screen.Explore.route) { ExploreScreen(navController) }
-            composable(Screen.Collection.route) { CollectionScreen(navController) }
+            composable(Screen.Explore.route) { ExploreScreen(rootNavController) }
+            composable(Screen.Collection.route) { CollectionScreen(rootNavController) }
             composable(Screen.Profile.route) {
                 ProfileScreen(
                     onLogout = {
-                        navController.navigate(Screen.Login.route) {
+                        rootNavController.navigate(Screen.Login.route) {
                             popUpTo(0)
                             launchSingleTop = true
                         }
