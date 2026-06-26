@@ -1,9 +1,11 @@
 package com.maikelhulu.asesmen3app.viewmodel
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.maikelhulu.asesmen3app.database.AppDatabase
+import com.maikelhulu.asesmen3app.model.ApiItem
 import com.maikelhulu.asesmen3app.model.ApiStatus
 import com.maikelhulu.asesmen3app.model.Item
 import com.maikelhulu.asesmen3app.network.RetrofitInstance
@@ -11,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -35,7 +38,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         url = apiItem.url,
                         width = apiItem.width,
                         height = apiItem.height,
-                        isLocal = false
+                        isLocal = false,
+                        userId = userId
                     )
                 }
 
@@ -60,5 +64,25 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun retryFetch(userId: String) {
         fetchAndSyncData(userId)
+    }
+
+    fun deleteItem(itemId: String) {
+        viewModelScope.launch {
+            itemDao.deleteItem(itemId)
+        }
+    }
+
+    fun saveItemLocally(userId: String, title: String, description: String, imageUri: Uri?) {
+        viewModelScope.launch {
+            val newItem = Item(
+                id = UUID.randomUUID().toString(),
+                url = imageUri?.toString() ?: "",
+                width = 0,
+                height = 0,
+                isLocal = true,
+                userId = userId
+            )
+            itemDao.insertItem(newItem)
+        }
     }
 }

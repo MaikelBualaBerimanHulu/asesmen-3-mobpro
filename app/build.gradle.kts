@@ -20,6 +20,7 @@ android {
         // Mengambil Web Client ID dari local.properties secara aman
         val webClientId = project.findProperty("WEB_CLIENT_ID") as? String ?: ""
         buildConfigField("String", "WEB_CLIENT_ID", "\"$webClientId\"")
+
     }
 
     buildTypes {
@@ -77,7 +78,8 @@ dependencies {
     implementation(libs.googleid)
 
     implementation(libs.androidx.compose.material.icons.extended)
-    implementation(libs.canhub.cropper)
+
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -87,4 +89,5 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    implementation(libs.androidx.compose.material.icons.extended)
 }

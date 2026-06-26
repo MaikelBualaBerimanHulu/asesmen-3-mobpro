@@ -11,7 +11,8 @@ data class Item(
     val url: String,
     val width: Int,
     val height: Int,
-    val isLocal: Boolean = false
+    val isLocal: Boolean = false,
+    val userId: String = "" // TAMBAHKAN INI
 )
 
 data class ApiItem(

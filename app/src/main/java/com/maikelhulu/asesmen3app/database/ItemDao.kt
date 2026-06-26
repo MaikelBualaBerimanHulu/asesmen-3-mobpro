@@ -16,5 +16,5 @@ interface ItemDao {
     suspend fun insertItem(item: Item)
 
     @Query("DELETE FROM items WHERE id = :itemId")
-    suspend fun deleteItem(itemId: Int)
+    suspend fun deleteItem(itemId: String) // Ubah tipe jadi String sesuai PrimaryKey baru
 }
