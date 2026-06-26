@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -27,7 +28,12 @@ import com.maikelhulu.asesmen3app.viewmodel.MainViewModel
 fun SkeletonCard() {
     val transition = rememberInfiniteTransition(label = "skel")
     val alpha by transition.animateFloat(0.3f, 0.7f, infiniteRepeatable(tween(800)), label = "shim")
-    Card(modifier = Modifier.aspectRatio(0.9f), shape = RoundedCornerShape(16.dp)) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(300.dp),
+        shape = RoundedCornerShape(20.dp)
+    ) {
         Box(Modifier.fillMaxSize().background(Brush.linearGradient(listOf(Color.Gray.copy(alpha), Color.LightGray.copy(alpha)))))
     }
 }
@@ -55,7 +61,12 @@ fun ExploreScreen(navController: NavHostController) {
     }
 
     when (apiStatus) {
-        ApiStatus.LOADING -> LazyVerticalGrid(GridCells.Fixed(2), contentPadding = PaddingValues(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        ApiStatus.LOADING -> LazyVerticalGrid(
+            columns = GridCells.Fixed(1),
+            contentPadding = PaddingValues(20.dp),
+            horizontalArrangement = Arrangement.spacedBy(18.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp)
+        ) {
             items(6) { SkeletonCard() }
         }
         ApiStatus.FAILED -> Box(
@@ -64,9 +75,12 @@ fun ExploreScreen(navController: NavHostController) {
         ) {
             // PERBAIKAN: Gunakan named parameter horizontalAlignment
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Gagal memuat data.", fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(8.dp))
-                Button(onClick = { hasFetched = false; viewModel.retryFetch(userEmail ?: "") }) { Text("Retry") }
+                Text("Gagal memuat data.", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.headlineSmall)
+                Spacer(Modifier.height(12.dp))
+                Button(
+                    onClick = { hasFetched = false; viewModel.retryFetch(userEmail ?: "") },
+                    modifier = Modifier.height(54.dp)
+                ) { Text("Retry", style = MaterialTheme.typography.titleMedium) }
             }
         }
         ApiStatus.SUCCESS -> {
@@ -76,18 +90,29 @@ fun ExploreScreen(navController: NavHostController) {
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("Tidak ada data dari API.", fontWeight = FontWeight.Bold)
+                    Text("Tidak ada data dari API.", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.headlineSmall)
                 }
             } else {
-                LazyVerticalGrid(GridCells.Fixed(2), contentPadding = PaddingValues(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(1),
+                    contentPadding = PaddingValues(20.dp),
+                    horizontalArrangement = Arrangement.spacedBy(18.dp),
+                    verticalArrangement = Arrangement.spacedBy(18.dp)
+                ) {
                     items(remoteItems) { item ->
-                        val ratio = if (item.width > 0 && item.height > 0) (item.width.toFloat() / item.height.toFloat()).coerceIn(0.6f, 1.4f) else 1f
                         Card(
-                            modifier = Modifier.aspectRatio(ratio),
-                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(320.dp),
+                            shape = RoundedCornerShape(20.dp),
                             onClick = { navController.navigate(com.maikelhulu.asesmen3app.navigation.Screen.ItemDetail.createRoute(item.id)) }
                         ) {
-                            AsyncImage(model = item.url, contentDescription = null, modifier = Modifier.fillMaxSize())
+                            AsyncImage(
+                                model = item.url,
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
                         }
                     }
                 }

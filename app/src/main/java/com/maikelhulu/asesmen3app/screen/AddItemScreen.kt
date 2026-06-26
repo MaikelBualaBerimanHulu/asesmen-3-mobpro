@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -47,9 +48,9 @@ fun AddItemScreen(onNavigateBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Tambah Koleksi Baru") },
+                title = { Text("Tambah Koleksi Baru", style = MaterialTheme.typography.headlineSmall) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = onNavigateBack, modifier = Modifier.size(56.dp)) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Kembali")
                     }
                 }
@@ -60,14 +61,17 @@ fun AddItemScreen(onNavigateBack: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
                 label = { Text("Judul Koleksi") },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(68.dp),
+                textStyle = MaterialTheme.typography.titleMedium,
                 singleLine = true
             )
 
@@ -76,13 +80,14 @@ fun AddItemScreen(onNavigateBack: () -> Unit) {
                 onValueChange = { description = it },
                 label = { Text("Deskripsi") },
                 modifier = Modifier.fillMaxWidth(),
+                textStyle = MaterialTheme.typography.titleMedium,
                 minLines = 3
             )
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .height(300.dp)
                     .clip(MaterialTheme.shapes.medium),
                 contentAlignment = Alignment.Center
             ) {
@@ -90,16 +95,19 @@ fun AddItemScreen(onNavigateBack: () -> Unit) {
                     AsyncImage(
                         model = imageUri,
                         contentDescription = "Preview Gambar",
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
                     )
                 } else {
                     Button(
                         onClick = { galleryLauncher.launch("image/*") },
-                        modifier = Modifier.align(Alignment.Center)
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .height(58.dp)
                     ) {
                         Icon(Icons.Default.CameraAlt, contentDescription = null)
-                        Spacer(Modifier.width(8.dp))
-                        Text("Pilih Gambar dari Galeri")
+                        Spacer(Modifier.width(10.dp))
+                        Text("Pilih Gambar dari Galeri", style = MaterialTheme.typography.titleMedium)
                     }
                 }
             }
@@ -113,10 +121,12 @@ fun AddItemScreen(onNavigateBack: () -> Unit) {
                         onNavigateBack()
                     }
                 },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(58.dp),
                 enabled = title.isNotBlank() && description.isNotBlank() && imageUri != null
             ) {
-                Text("Simpan Koleksi")
+                Text("Simpan Koleksi", style = MaterialTheme.typography.titleMedium)
             }
         }
     }

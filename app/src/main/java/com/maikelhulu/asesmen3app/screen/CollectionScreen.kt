@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -46,28 +47,50 @@ fun CollectionScreen(navController: NavHostController) {
         ) {
             // PERBAIKAN: Gunakan named parameter horizontalAlignment
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Koleksimu kosong.", fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(8.dp))
-                Text("Tambahkan koleksi pertamamu!", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("Koleksimu kosong.", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.headlineSmall)
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    "Tambahkan koleksi pertamamu!",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
         }
     } else {
-        LazyVerticalGrid(GridCells.Fixed(2), contentPadding = PaddingValues(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(1),
+            contentPadding = PaddingValues(20.dp),
+            horizontalArrangement = Arrangement.spacedBy(18.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp)
+        ) {
             items(localItems) { item ->
-                val ratio = if (item.width > 0 && item.height > 0) (item.width.toFloat() / item.height.toFloat()).coerceIn(0.6f, 1.4f) else 1f
                 Card(
-                    modifier = Modifier.aspectRatio(ratio),
-                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(320.dp),
+                    shape = RoundedCornerShape(20.dp),
                     onClick = { navController.navigate(com.maikelhulu.asesmen3app.navigation.Screen.ItemDetail.createRoute(item.id)) }
                 ) {
                     Box(Modifier.fillMaxSize()) {
-                        AsyncImage(model = item.url, contentDescription = null, modifier = Modifier.fillMaxSize())
-                        Badge(modifier = Modifier.align(Alignment.TopStart).padding(8.dp)) { Text("Lokal") }
+                        AsyncImage(
+                            model = item.url,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                        Badge(modifier = Modifier.align(Alignment.TopStart).padding(12.dp)) {
+                            Text("Lokal", style = MaterialTheme.typography.labelLarge)
+                        }
                         IconButton(
                             onClick = { itemToDelete = item },
-                            modifier = Modifier.align(Alignment.TopEnd).padding(4.dp).size(32.dp)
+                            modifier = Modifier.align(Alignment.TopEnd).padding(8.dp).size(48.dp)
                         ) {
-                            Icon(Icons.Default.Delete, contentDescription = "Hapus", tint = MaterialTheme.colorScheme.error)
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = "Hapus",
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(30.dp)
+                            )
                         }
                     }
                 }
@@ -82,9 +105,17 @@ fun CollectionScreen(navController: NavHostController) {
             title = { Text("Hapus Koleksi?") },
             text = { Text("Tindakan ini tidak dapat dibatalkan.") },
             confirmButton = {
-                Button(onClick = { viewModel.deleteItem(item.id); itemToDelete = null }, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)) { Text("Hapus") }
+                Button(
+                    onClick = { viewModel.deleteItem(item.id); itemToDelete = null },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                    modifier = Modifier.height(52.dp)
+                ) { Text("Hapus", style = MaterialTheme.typography.titleMedium) }
             },
-            dismissButton = { TextButton(onClick = { itemToDelete = null }) { Text("Batal") } }
+            dismissButton = {
+                TextButton(onClick = { itemToDelete = null }, modifier = Modifier.height(52.dp)) {
+                    Text("Batal", style = MaterialTheme.typography.titleMedium)
+                }
+            }
         )
     }
 }

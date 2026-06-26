@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -26,22 +27,35 @@ fun ItemDetailScreen(itemId: String, onNavigateBack: () -> Unit) {
     var isFavorite by remember { mutableStateOf(false) }
 
     if (item == null) {
-        Box(Modifier.fillMaxSize(), Alignment.Center) { Text("Item tidak ditemukan.") }
+        Box(Modifier.fillMaxSize(), Alignment.Center) {
+            Text("Item tidak ditemukan.", style = MaterialTheme.typography.headlineSmall)
+        }
         return
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (item.isLocal) "Koleksi Lokal" else "Explore Item") },
-                navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.Default.ArrowBack, null) } },
+                title = {
+                    Text(
+                        if (item.isLocal) "Koleksi Lokal" else "Explore Item",
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack, modifier = Modifier.size(56.dp)) {
+                        Icon(Icons.Default.ArrowBack, null)
+                    }
+                },
                 actions = {
-                    IconButton(onClick = { isFavorite = !isFavorite }) {
+                    IconButton(onClick = { isFavorite = !isFavorite }, modifier = Modifier.size(56.dp)) {
                         Icon(if (isFavorite) Icons.Default.Favorite else Icons.Default.Favorite,
                             contentDescription = "Favorite",
                             tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
                     }
-                    IconButton(onClick = { /* Share logic */ }) { Icon(Icons.Default.Share, null) }
+                    IconButton(onClick = { /* Share logic */ }, modifier = Modifier.size(56.dp)) {
+                        Icon(Icons.Default.Share, null)
+                    }
                 }
             )
         }
@@ -50,29 +64,39 @@ fun ItemDetailScreen(itemId: String, onNavigateBack: () -> Unit) {
             modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            AsyncImage(model = item.url, contentDescription = null, modifier = Modifier.fillMaxWidth().aspectRatio(1f))
+            AsyncImage(
+                model = item.url,
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(420.dp),
+                contentScale = ContentScale.Crop
+            )
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(28.dp))
 
-            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Metadata", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(8.dp))
-                    Text("ID: ${item.id.take(12)}...")
-                    Text("Dimensi: ${item.width} x ${item.height}px")
-                    Text("Sumber: ${if (item.isLocal) "Upload Lokal" else "The Cat API"}")
-                    Text("Status: ${if (item.isLocal) "Tersimpan Offline" else "Online Only"}")
+            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("Metadata", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.headlineSmall)
+                    Spacer(Modifier.height(4.dp))
+                    Text("ID: ${item.id.take(12)}...", style = MaterialTheme.typography.titleMedium)
+                    Text("Dimensi: ${item.width} x ${item.height}px", style = MaterialTheme.typography.titleMedium)
+                    Text("Sumber: ${if (item.isLocal) "Upload Lokal" else "The Cat API"}", style = MaterialTheme.typography.titleMedium)
+                    Text("Status: ${if (item.isLocal) "Tersimpan Offline" else "Online Only"}", style = MaterialTheme.typography.titleMedium)
                 }
             }
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(28.dp))
 
             Button(
                 onClick = { /* Download simulasi */ },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
-            ) { Text("Simpan ke Galeri") }
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).height(58.dp)
+            ) { Text("Simpan ke Galeri", style = MaterialTheme.typography.titleMedium) }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(20.dp))
         }
     }
 }

@@ -1,6 +1,8 @@
 package com.maikelhulu.asesmen3app.screen
 
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Explore
@@ -8,6 +10,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost // Import eksplisit
 import androidx.navigation.compose.composable // Import eksplisit
@@ -21,7 +24,9 @@ fun MainShell(navController: NavHostController) {
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
+            NavigationBar(
+                modifier = Modifier.height(96.dp)
+            ) {
                 NavigationBarItem(
                     selected = selectedTab == Screen.Explore.route,
                     onClick = {
@@ -32,8 +37,8 @@ fun MainShell(navController: NavHostController) {
                             restoreState = true
                         }
                     },
-                    icon = { Icon(Icons.Default.Explore, contentDescription = "Explore") },
-                    label = { Text("Explore") }
+                    icon = { Icon(Icons.Default.Explore, contentDescription = "Explore", modifier = Modifier.size(30.dp)) },
+                    label = { Text("Explore", style = MaterialTheme.typography.titleMedium) }
                 )
 
                 NavigationBarItem(
@@ -42,9 +47,10 @@ fun MainShell(navController: NavHostController) {
                     icon = {
                         FloatingActionButton(
                             onClick = { navController.navigate(Screen.AddItem.route) },
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            modifier = Modifier.size(64.dp)
                         ) {
-                            Icon(Icons.Default.Add, contentDescription = "Tambah")
+                            Icon(Icons.Default.Add, contentDescription = "Tambah", modifier = Modifier.size(34.dp))
                         }
                     },
                     label = null
@@ -60,8 +66,8 @@ fun MainShell(navController: NavHostController) {
                             restoreState = true
                         }
                     },
-                    icon = { Icon(Icons.Default.Person, contentDescription = "Koleksi") },
-                    label = { Text("Koleksi") }
+                    icon = { Icon(Icons.Default.Person, contentDescription = "Koleksi", modifier = Modifier.size(30.dp)) },
+                    label = { Text("Koleksi", style = MaterialTheme.typography.titleMedium) }
                 )
             }
         }
