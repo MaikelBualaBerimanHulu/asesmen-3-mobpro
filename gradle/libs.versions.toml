@@ -17,9 +17,10 @@ moshiVersion = "1.15.1"
 coilVersion = "2.6.0"
 datastoreVersion = "1.1.1"
 credentialManagerVersion = "1.2.2"
+googleIdLibraryVersion = "1.1.0"
 googleIdVersion = "1.1.0"
 iconsExtendedVersion = "1.6.8"
-imageCropperVersion = "4.6.0"
+imageCropperVersion = "4.5.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -55,10 +56,11 @@ androidx-datastore-preferences = { module = "androidx.datastore:datastore-prefer
 androidx-credential-manager = { module = "androidx.credentials:credentials", version.ref = "credentialManagerVersion" }
 androidx-credential-manager-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentialManagerVersion" }
 google-android-gms-play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "googleIdVersion" }
+googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleIdLibraryVersion" }
 
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "iconsExtendedVersion" }
 
-canhub-cropper = { module = "com.vanniktech:cropper", version.ref = "imageCropperVersion" }
+canhub-cropper = { module = "com.github.CanHub:Android-Image-Cropper", version.ref = "imageCropperVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

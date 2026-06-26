@@ -1,4 +1,4 @@
-package com.maikelhulu.asesmen3app.model.screen
+package com.maikelhulu.asesmen3app.screen
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -6,8 +6,9 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.AutoMirrored.Filled.List
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Person
@@ -15,15 +16,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.maikelhulu.asesmen3app.model.ApiStatus
-import com.maikelhulu.asesmen3app.model.util.SettingsDataStore
-import com.maikelhulu.asesmen3app.model.util.UserDataStore
-import com.maikelhulu.asesmen3app.model.viewmodel.MainViewModel
+import com.maikelhulu.asesmen3app.util.SettingsDataStore
+import com.maikelhulu.asesmen3app.util.UserDataStore
+import com.maikelhulu.asesmen3app.viewmodel.MainViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,8 +37,12 @@ fun MainScreen(navController: NavHostController) {
     val coroutineScope = rememberCoroutineScope()
 
     var isGridLayout by remember { mutableStateOf(false) }
+    var showProfileDialog by remember { mutableStateOf(false) }
     var showLoginDialog by remember { mutableStateOf(false) }
+
     var userEmail by remember { mutableStateOf<String?>(null) }
+    var userName by remember { mutableStateOf<String?>(null) }
+    var userPhoto by remember { mutableStateOf<String?>(null) }
 
     val apiStatus by viewModel.apiStatus.collectAsState()
     val items by viewModel.items.collectAsState()
@@ -49,6 +56,9 @@ fun MainScreen(navController: NavHostController) {
     LaunchedEffect(Unit) {
         UserDataStore.getUserSession(context).collect { session ->
             userEmail = session["email"]
+            userName = session["name"]
+            userPhoto = session["photo_url"]
+
             if (userEmail != null) {
                 viewModel.observeLocalItems(userEmail!!)
                 viewModel.fetchAndSyncData(userEmail!!)
@@ -63,7 +73,7 @@ fun MainScreen(navController: NavHostController) {
                 actions = {
                     IconButton(onClick = {
                         if (userEmail == null) showLoginDialog = true
-                        else { /* TODO: Show Profile Dialog */ }
+                        else showProfileDialog = true
                     }) {
                         Icon(Icons.Default.Person, contentDescription = "Profil")
                     }
@@ -157,12 +167,56 @@ fun MainScreen(navController: NavHostController) {
             text = { Text("Silakan login untuk mengakses koleksi pribadi Anda.") },
             confirmButton = {
                 Button(onClick = {
-                    // TODO: Call Google Sign-In from Module 14
-                    showLoginDialog = false
+                    coroutineScope.launch {
+                        signIn(context).onSuccess { userData ->
+                            UserDataStore.saveUserSession(
+                                context = context,
+                                email = userData["email"] ?: "",
+                                name = userData["name"] ?: "",
+                                photoUrl = userData["photoUrl"]
+                            )
+                            showLoginDialog = false
+                        }.onFailure {
+                            // Handle error jika perlu
+                        }
+                    }
                 }) { Text("Login") }
             },
             dismissButton = {
                 TextButton(onClick = { showLoginDialog = false }) { Text("Batal") }
+            }
+        )
+    }
+
+    if (showProfileDialog) {
+        AlertDialog(
+            onDismissRequest = { showProfileDialog = false },
+            icon = {
+                AsyncImage(
+                    model = userPhoto,
+                    contentDescription = "Profile Picture",
+                    modifier = Modifier
+                        .size(64.dp)
+                        .clip(CircleShape)
+                )
+            },
+            title = { Text(userName ?: "User", fontWeight = FontWeight.Bold) },
+            text = { Text(userEmail ?: "") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        coroutineScope.launch {
+                            UserDataStore.clearUserSession(context)
+                            showProfileDialog = false
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Logout")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showProfileDialog = false }) { Text("Tutup") }
             }
         )
     }

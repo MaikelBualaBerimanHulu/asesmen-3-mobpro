@@ -15,8 +15,11 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Mengambil Web Client ID dari local.properties secara aman
+        val webClientId = project.findProperty("WEB_CLIENT_ID") as? String ?: ""
+        buildConfigField("String", "WEB_CLIENT_ID", "\"$webClientId\"")
     }
 
     buildTypes {
@@ -28,13 +31,16 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
     buildFeatures {
         compose = true
         buildConfig = true
@@ -63,15 +69,14 @@ dependencies {
     implementation(libs.squareup.moshi.kotlin)
 
     implementation(libs.io.coil.kt.coil.compose)
-
     implementation(libs.androidx.datastore.preferences)
 
     implementation(libs.androidx.credential.manager)
     implementation(libs.androidx.credential.manager.play.services.auth)
     implementation(libs.google.android.gms.play.services.auth)
+    implementation(libs.googleid)
 
     implementation(libs.androidx.compose.material.icons.extended)
-
     implementation(libs.canhub.cropper)
 
     testImplementation(libs.junit)
@@ -81,4 +86,5 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
 }

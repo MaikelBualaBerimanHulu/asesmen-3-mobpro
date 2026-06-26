@@ -1,4 +1,4 @@
-package com.maikelhulu.asesmen3app.model.viewmodel
+package com.maikelhulu.asesmen3app.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
