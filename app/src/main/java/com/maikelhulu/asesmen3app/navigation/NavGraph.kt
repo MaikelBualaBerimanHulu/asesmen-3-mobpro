@@ -12,8 +12,19 @@ import com.maikelhulu.asesmen3app.screen.*
 fun SetupNavGraph(navController: NavHostController) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Main.route
+        startDestination = Screen.Login.route
     ) {
+        composable(route = Screen.Login.route) {
+            LoginScreen(
+                onLoginSuccess = {
+                    navController.navigate(Screen.Main.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
+
         // MAIN SHELL DENGAN BOTTOM NAV
         composable(route = Screen.Main.route) {
             MainShell(navController = navController)

@@ -12,6 +12,7 @@ import com.maikelhulu.asesmen3app.network.RetrofitInstance
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -26,6 +27,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _items = MutableStateFlow<List<Item>>(emptyList())
     val items: StateFlow<List<Item>> = _items.asStateFlow()
 
+    private val _selectedItem = MutableStateFlow<Item?>(null)
+    val selectedItem: StateFlow<Item?> = _selectedItem.asStateFlow()
+
     fun fetchAndSyncData(userId: String) {
         viewModelScope.launch {
             _apiStatus.value = ApiStatus.LOADING
@@ -39,7 +43,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         width = apiItem.width,
                         height = apiItem.height,
                         isLocal = false,
-                        userId = userId
+                        userId = userId,
+                        title = "Explore ${apiItem.id.take(6).uppercase()}",
+                        description = "Foto dari The Cat API. Data tersimpan di Room agar tetap bisa dibuka ulang.",
+                        createdAt = System.currentTimeMillis(),
+                        updatedAt = System.currentTimeMillis()
                     )
                 }
 
@@ -54,10 +62,28 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun observeLocalItems(userId: String) {
+    fun observeItems(userId: String) {
         viewModelScope.launch {
             itemDao.getItemsByUser(userId).collect { list ->
                 _items.value = list
+            }
+        }
+    }
+
+    fun observeItem(itemId: String) {
+        viewModelScope.launch {
+            itemDao.observeItemById(itemId).collect { item ->
+                _selectedItem.value = item
+            }
+        }
+    }
+
+    fun observeLocalItems(userId: String) {
+        viewModelScope.launch {
+            itemDao.getItemsByUser(userId).map { list ->
+                list.filter { it.isLocal }
+            }.collect { localItems ->
+                _items.value = localItems
             }
         }
     }
@@ -72,15 +98,32 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun updateItem(itemId: String, title: String, description: String) {
+        viewModelScope.launch {
+            itemDao.updateItemText(itemId, title.trim(), description.trim(), System.currentTimeMillis())
+        }
+    }
+
+    fun toggleFavorite(item: Item) {
+        viewModelScope.launch {
+            itemDao.updateFavorite(item.id, !item.isFavorite, System.currentTimeMillis())
+        }
+    }
+
     fun saveItemLocally(userId: String, title: String, description: String, imageUri: Uri?) {
         viewModelScope.launch {
+            val now = System.currentTimeMillis()
             val newItem = Item(
                 id = UUID.randomUUID().toString(),
                 url = imageUri?.toString() ?: "",
                 width = 0,
                 height = 0,
                 isLocal = true,
-                userId = userId
+                userId = userId,
+                title = title.trim(),
+                description = description.trim(),
+                createdAt = now,
+                updatedAt = now
             )
             itemDao.insertItem(newItem)
         }

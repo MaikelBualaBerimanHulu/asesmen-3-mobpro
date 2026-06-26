@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
@@ -22,11 +22,14 @@ import com.maikelhulu.asesmen3app.viewmodel.MainViewModel
 @Composable
 fun ItemDetailScreen(itemId: String, onNavigateBack: () -> Unit) {
     val viewModel: MainViewModel = viewModel()
-    val items by viewModel.items.collectAsState()
-    val item = items.find { it.id == itemId }
-    var isFavorite by remember { mutableStateOf(false) }
+    val item by viewModel.selectedItem.collectAsState()
 
-    if (item == null) {
+    LaunchedEffect(itemId) {
+        viewModel.observeItem(itemId)
+    }
+
+    val currentItem = item
+    if (currentItem == null) {
         Box(Modifier.fillMaxSize(), Alignment.Center) {
             Text("Item tidak ditemukan.", style = MaterialTheme.typography.headlineSmall)
         }
@@ -38,20 +41,20 @@ fun ItemDetailScreen(itemId: String, onNavigateBack: () -> Unit) {
             TopAppBar(
                 title = {
                     Text(
-                        if (item.isLocal) "Koleksi Lokal" else "Explore Item",
+                        if (currentItem.isLocal) "Koleksi Lokal" else "Explore Item",
                         style = MaterialTheme.typography.headlineSmall
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack, modifier = Modifier.size(56.dp)) {
-                        Icon(Icons.Default.ArrowBack, null)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
                     }
                 },
                 actions = {
-                    IconButton(onClick = { isFavorite = !isFavorite }, modifier = Modifier.size(56.dp)) {
-                        Icon(if (isFavorite) Icons.Default.Favorite else Icons.Default.Favorite,
+                    IconButton(onClick = { viewModel.toggleFavorite(currentItem) }, modifier = Modifier.size(56.dp)) {
+                        Icon(if (currentItem.isFavorite) Icons.Default.Favorite else Icons.Default.Favorite,
                             contentDescription = "Favorite",
-                            tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
+                            tint = if (currentItem.isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
                     }
                     IconButton(onClick = { /* Share logic */ }, modifier = Modifier.size(56.dp)) {
                         Icon(Icons.Default.Share, null)
@@ -65,7 +68,7 @@ fun ItemDetailScreen(itemId: String, onNavigateBack: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             AsyncImage(
-                model = item.url,
+                model = currentItem.url,
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -80,12 +83,16 @@ fun ItemDetailScreen(itemId: String, onNavigateBack: () -> Unit) {
                     modifier = Modifier.padding(20.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Metadata", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.headlineSmall)
+                    Text(currentItem.title.ifBlank { "Tanpa Judul" }, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.headlineSmall)
+                    Text(currentItem.description.ifBlank { "Tidak ada deskripsi" }, style = MaterialTheme.typography.titleMedium)
+                    Spacer(Modifier.height(8.dp))
+                    Text("Metadata", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
                     Spacer(Modifier.height(4.dp))
-                    Text("ID: ${item.id.take(12)}...", style = MaterialTheme.typography.titleMedium)
-                    Text("Dimensi: ${item.width} x ${item.height}px", style = MaterialTheme.typography.titleMedium)
-                    Text("Sumber: ${if (item.isLocal) "Upload Lokal" else "The Cat API"}", style = MaterialTheme.typography.titleMedium)
-                    Text("Status: ${if (item.isLocal) "Tersimpan Offline" else "Online Only"}", style = MaterialTheme.typography.titleMedium)
+                    Text("ID: ${currentItem.id.take(12)}...", style = MaterialTheme.typography.titleMedium)
+                    Text("Dimensi: ${currentItem.width} x ${currentItem.height}px", style = MaterialTheme.typography.titleMedium)
+                    Text("Sumber: ${if (currentItem.isLocal) "Upload Lokal" else "The Cat API"}", style = MaterialTheme.typography.titleMedium)
+                    Text("Status: ${if (currentItem.isLocal) "Tersimpan Offline" else "Online Only"}", style = MaterialTheme.typography.titleMedium)
+                    Text("Favorit: ${if (currentItem.isFavorite) "Ya" else "Tidak"}", style = MaterialTheme.typography.titleMedium)
                 }
             }
 

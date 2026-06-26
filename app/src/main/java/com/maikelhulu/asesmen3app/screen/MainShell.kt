@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -66,8 +67,22 @@ fun MainShell(navController: NavHostController) {
                             restoreState = true
                         }
                     },
-                    icon = { Icon(Icons.Default.Person, contentDescription = "Koleksi", modifier = Modifier.size(30.dp)) },
+                    icon = { Icon(Icons.Default.PhotoLibrary, contentDescription = "Koleksi", modifier = Modifier.size(30.dp)) },
                     label = { Text("Koleksi", style = MaterialTheme.typography.titleMedium) }
+                )
+
+                NavigationBarItem(
+                    selected = selectedTab == Screen.Profile.route,
+                    onClick = {
+                        selectedTab = Screen.Profile.route
+                        navController.navigate(Screen.Profile.route) {
+                            popUpTo(Screen.Main.route) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    icon = { Icon(Icons.Default.Person, contentDescription = "Profil", modifier = Modifier.size(30.dp)) },
+                    label = { Text("Profil", style = MaterialTheme.typography.titleMedium) }
                 )
             }
         }
@@ -80,6 +95,16 @@ fun MainShell(navController: NavHostController) {
         ) {
             composable(Screen.Explore.route) { ExploreScreen(navController) }
             composable(Screen.Collection.route) { CollectionScreen(navController) }
+            composable(Screen.Profile.route) {
+                ProfileScreen(
+                    onLogout = {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(0)
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
         }
     }
 }

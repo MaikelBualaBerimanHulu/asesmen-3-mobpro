@@ -12,7 +12,12 @@ data class Item(
     val width: Int,
     val height: Int,
     val isLocal: Boolean = false,
-    val userId: String = "" // TAMBAHKAN INI
+    val userId: String = "",
+    val title: String = "",
+    val description: String = "",
+    val isFavorite: Boolean = false,
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis()
 )
 
 data class ApiItem(
