@@ -1,5 +1,6 @@
 package com.maikelhulu.asesmen3app.screen
 
+import android.content.Intent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -12,20 +13,33 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.maikelhulu.asesmen3app.model.Item
+import com.maikelhulu.asesmen3app.util.UserDataStore
+import com.maikelhulu.asesmen3app.util.catNameFor
 import com.maikelhulu.asesmen3app.viewmodel.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItemDetailScreen(itemId: String, onNavigateBack: () -> Unit) {
     val viewModel: MainViewModel = viewModel()
+    val context = LocalContext.current
     val item by viewModel.selectedItem.collectAsState()
+    var userEmail by remember { mutableStateOf("") }
+    var savedToCollection by remember { mutableStateOf(false) }
 
     LaunchedEffect(itemId) {
         viewModel.observeItem(itemId)
+    }
+
+    LaunchedEffect(Unit) {
+        UserDataStore.getUserSession(context).collect { session ->
+            userEmail = session["email"].orEmpty()
+        }
     }
 
     val currentItem = item
@@ -41,7 +55,7 @@ fun ItemDetailScreen(itemId: String, onNavigateBack: () -> Unit) {
             TopAppBar(
                 title = {
                     Text(
-                        if (currentItem.isLocal) "Koleksi Lokal" else "Explore Item",
+                        if (currentItem.isLocal) "Detail Koleksi" else "Detail Foto",
                         style = MaterialTheme.typography.headlineSmall
                     )
                 },
@@ -56,7 +70,16 @@ fun ItemDetailScreen(itemId: String, onNavigateBack: () -> Unit) {
                             contentDescription = "Favorite",
                             tint = if (currentItem.isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
                     }
-                    IconButton(onClick = { /* Share logic */ }, modifier = Modifier.size(56.dp)) {
+                    IconButton(
+                        onClick = {
+                            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(Intent.EXTRA_TEXT, "${currentItem.cleanTitle()}\n${currentItem.url}")
+                            }
+                            context.startActivity(Intent.createChooser(shareIntent, "Bagikan foto"))
+                        },
+                        modifier = Modifier.size(56.dp)
+                    ) {
                         Icon(Icons.Default.Share, null)
                     }
                 }
@@ -83,27 +106,63 @@ fun ItemDetailScreen(itemId: String, onNavigateBack: () -> Unit) {
                     modifier = Modifier.padding(20.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(currentItem.title.ifBlank { "Tanpa Judul" }, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.headlineSmall)
-                    Text(currentItem.description.ifBlank { "Tidak ada deskripsi" }, style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(8.dp))
-                    Text("Metadata", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
-                    Spacer(Modifier.height(4.dp))
-                    Text("ID: ${currentItem.id.take(12)}...", style = MaterialTheme.typography.titleMedium)
-                    Text("Dimensi: ${currentItem.width} x ${currentItem.height}px", style = MaterialTheme.typography.titleMedium)
-                    Text("Sumber: ${if (currentItem.isLocal) "Upload Lokal" else "The Cat API"}", style = MaterialTheme.typography.titleMedium)
-                    Text("Status: ${if (currentItem.isLocal) "Tersimpan Offline" else "Online Only"}", style = MaterialTheme.typography.titleMedium)
-                    Text("Favorit: ${if (currentItem.isFavorite) "Ya" else "Tidak"}", style = MaterialTheme.typography.titleMedium)
+                    val title = currentItem.cleanTitle()
+                    val description = currentItem.cleanDescription()
+                    Text(title, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.headlineSmall)
+                    if (description.isNotBlank()) {
+                        Text(description, style = MaterialTheme.typography.titleMedium)
+                    }
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        if (currentItem.isLocal) "Tersimpan di koleksi" else "Belum tersimpan di koleksi",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        "Ukuran gambar: ${currentItem.width} x ${currentItem.height}px",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
 
             Spacer(Modifier.height(28.dp))
 
-            Button(
-                onClick = { /* Download simulasi */ },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).height(58.dp)
-            ) { Text("Simpan ke Galeri", style = MaterialTheme.typography.titleMedium) }
+            if (!currentItem.isLocal) {
+                Button(
+                    onClick = {
+                        if (userEmail.isNotBlank()) {
+                            viewModel.saveRemoteToCollection(userEmail, currentItem)
+                            savedToCollection = true
+                        }
+                    },
+                    enabled = userEmail.isNotBlank() && !savedToCollection,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).height(58.dp)
+                ) {
+                    Text(
+                        if (savedToCollection) "Sudah masuk Koleksi" else "Simpan ke Koleksi",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+            }
 
             Spacer(Modifier.height(20.dp))
         }
+    }
+}
+
+private fun Item.cleanTitle(): String {
+    return if (!isLocal && (title.startsWith("Explore ", ignoreCase = true) || title.equals("Foto pilihan", ignoreCase = true))) {
+        catNameFor(id)
+    } else {
+        title.ifBlank { catNameFor(id) }
+    }
+}
+
+private fun Item.cleanDescription(): String {
+    return if (!isLocal && description.contains("The Cat API", ignoreCase = true)) {
+        ""
+    } else {
+        description
     }
 }

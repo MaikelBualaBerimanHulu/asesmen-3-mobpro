@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -54,5 +55,29 @@ object UserDataStore {
 
     suspend fun clearUserSession(context: Context) {
         context.userDataStore.edit { it.clear() }
+    }
+}
+
+object SavedFactStore {
+    private val KEY_SAVED_FACTS = stringSetPreferencesKey("saved_cat_facts")
+
+    fun getSavedFacts(context: Context): Flow<Set<String>> {
+        return context.settingsDataStore.data.map { preferences ->
+            preferences[KEY_SAVED_FACTS] ?: emptySet()
+        }
+    }
+
+    suspend fun saveFact(context: Context, fact: String) {
+        context.settingsDataStore.edit { preferences ->
+            val current = preferences[KEY_SAVED_FACTS] ?: emptySet()
+            preferences[KEY_SAVED_FACTS] = current + fact
+        }
+    }
+
+    suspend fun removeFact(context: Context, fact: String) {
+        context.settingsDataStore.edit { preferences ->
+            val current = preferences[KEY_SAVED_FACTS] ?: emptySet()
+            preferences[KEY_SAVED_FACTS] = current - fact
+        }
     }
 }

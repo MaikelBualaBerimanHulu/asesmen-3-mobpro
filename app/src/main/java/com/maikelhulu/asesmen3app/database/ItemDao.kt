@@ -27,6 +27,12 @@ interface ItemDao {
     @Query("UPDATE items SET isFavorite = :isFavorite, updatedAt = :updatedAt WHERE id = :itemId")
     suspend fun updateFavorite(itemId: String, isFavorite: Boolean, updatedAt: Long)
 
+    @Query("UPDATE items SET title = '' WHERE isLocal = 0 AND (title LIKE 'Explore %' OR title = 'Foto pilihan')")
+    suspend fun cleanOldRemoteTitles()
+
+    @Query("UPDATE items SET description = '' WHERE isLocal = 0 AND description LIKE '%The Cat API%'")
+    suspend fun cleanOldRemoteDescriptions()
+
     @Query("DELETE FROM items WHERE id = :itemId")
     suspend fun deleteItem(itemId: String) // Ubah tipe jadi String sesuai PrimaryKey baru
 }

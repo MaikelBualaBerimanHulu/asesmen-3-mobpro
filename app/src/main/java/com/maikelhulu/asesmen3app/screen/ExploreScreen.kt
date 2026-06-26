@@ -26,7 +26,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.maikelhulu.asesmen3app.model.ApiStatus
+import com.maikelhulu.asesmen3app.model.Item
 import com.maikelhulu.asesmen3app.util.UserDataStore
+import com.maikelhulu.asesmen3app.util.catNameFor
 import com.maikelhulu.asesmen3app.viewmodel.MainViewModel
 
 @Composable
@@ -71,8 +73,9 @@ fun ExploreScreen(navController: NavHostController) {
     val remoteItems = items
         .filter { !it.isLocal }
         .filter { item ->
+            val title = item.cleanTitle()
             val matchesQuery = query.isBlank() ||
-                item.title.contains(query, ignoreCase = true) ||
+                title.contains(query, ignoreCase = true) ||
                 item.description.contains(query, ignoreCase = true) ||
                 item.id.contains(query, ignoreCase = true)
             val matchesFavorite = !favoritesOnly || item.isFavorite
@@ -85,7 +88,7 @@ fun ExploreScreen(navController: NavHostController) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Explore", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                Text("Jelajah", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                 IconButton(
                     onClick = {
                         hasFetched = false
@@ -101,7 +104,7 @@ fun ExploreScreen(navController: NavHostController) {
                 value = query,
                 onValueChange = { query = it },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                label = { Text("Cari foto dari API") },
+                label = { Text("Cari foto") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -154,6 +157,8 @@ fun ExploreScreen(navController: NavHostController) {
                         modifier = Modifier.weight(1f)
                     ) {
                         items(remoteItems) { item ->
+                            val title = item.cleanTitle()
+                            val description = item.cleanDescription()
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -188,20 +193,22 @@ fun ExploreScreen(navController: NavHostController) {
                                     ) {
                                         Column(Modifier.padding(14.dp)) {
                                             Text(
-                                                item.title,
+                                                title,
                                                 color = Color.White,
                                                 style = MaterialTheme.typography.titleLarge,
                                                 fontWeight = FontWeight.Bold,
                                                 maxLines = 1,
                                                 overflow = TextOverflow.Ellipsis
                                             )
-                                            Text(
-                                                item.description,
-                                                color = Color.White,
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                maxLines = 2,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
+                                            if (description.isNotBlank()) {
+                                                Text(
+                                                    description,
+                                                    color = Color.White,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    maxLines = 2,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -211,5 +218,21 @@ fun ExploreScreen(navController: NavHostController) {
                 }
             }
         }
+    }
+}
+
+private fun Item.cleanTitle(): String {
+    return if (!isLocal && (title.startsWith("Explore ", ignoreCase = true) || title.equals("Foto pilihan", ignoreCase = true))) {
+        catNameFor(id)
+    } else {
+        title.ifBlank { catNameFor(id) }
+    }
+}
+
+private fun Item.cleanDescription(): String {
+    return if (!isLocal && description.contains("The Cat API", ignoreCase = true)) {
+        ""
+    } else {
+        description
     }
 }

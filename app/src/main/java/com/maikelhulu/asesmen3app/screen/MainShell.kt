@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.*
@@ -25,9 +26,18 @@ fun MainShell(rootNavController: NavHostController) {
     var selectedTab by remember { mutableStateOf(Screen.Explore.route) }
 
     Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { rootNavController.navigate(Screen.AddItem.route) },
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier.size(64.dp)
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Tambah", modifier = Modifier.size(34.dp))
+            }
+        },
         bottomBar = {
             NavigationBar(
-                modifier = Modifier.height(96.dp)
+                modifier = Modifier.height(88.dp)
             ) {
                 NavigationBarItem(
                     selected = selectedTab == Screen.Explore.route,
@@ -39,23 +49,8 @@ fun MainShell(rootNavController: NavHostController) {
                             restoreState = true
                         }
                     },
-                    icon = { Icon(Icons.Default.Explore, contentDescription = "Explore", modifier = Modifier.size(30.dp)) },
-                    label = { Text("Explore", style = MaterialTheme.typography.titleMedium) }
-                )
-
-                NavigationBarItem(
-                    selected = false,
-                    onClick = { rootNavController.navigate(Screen.AddItem.route) },
-                    icon = {
-                        FloatingActionButton(
-                            onClick = { rootNavController.navigate(Screen.AddItem.route) },
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            modifier = Modifier.size(64.dp)
-                        ) {
-                            Icon(Icons.Default.Add, contentDescription = "Tambah", modifier = Modifier.size(34.dp))
-                        }
-                    },
-                    label = null
+                    icon = { Icon(Icons.Default.Explore, contentDescription = "Jelajah", modifier = Modifier.size(30.dp)) },
+                    label = { Text("Jelajah", style = MaterialTheme.typography.labelLarge) }
                 )
 
                 NavigationBarItem(
@@ -69,7 +64,21 @@ fun MainShell(rootNavController: NavHostController) {
                         }
                     },
                     icon = { Icon(Icons.Default.PhotoLibrary, contentDescription = "Koleksi", modifier = Modifier.size(30.dp)) },
-                    label = { Text("Koleksi", style = MaterialTheme.typography.titleMedium) }
+                    label = { Text("Koleksi", style = MaterialTheme.typography.labelLarge) }
+                )
+
+                NavigationBarItem(
+                    selected = selectedTab == Screen.Facts.route,
+                    onClick = {
+                        selectedTab = Screen.Facts.route
+                        tabNavController.navigate(Screen.Facts.route) {
+                            popUpTo(Screen.Explore.route) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    icon = { Icon(Icons.Default.Lightbulb, contentDescription = "Fakta", modifier = Modifier.size(30.dp)) },
+                    label = { Text("Fakta", style = MaterialTheme.typography.labelLarge) }
                 )
 
                 NavigationBarItem(
@@ -83,7 +92,7 @@ fun MainShell(rootNavController: NavHostController) {
                         }
                     },
                     icon = { Icon(Icons.Default.Person, contentDescription = "Profil", modifier = Modifier.size(30.dp)) },
-                    label = { Text("Profil", style = MaterialTheme.typography.titleMedium) }
+                    label = { Text("Profil", style = MaterialTheme.typography.labelLarge) }
                 )
             }
         }
@@ -96,6 +105,7 @@ fun MainShell(rootNavController: NavHostController) {
         ) {
             composable(Screen.Explore.route) { ExploreScreen(rootNavController) }
             composable(Screen.Collection.route) { CollectionScreen(rootNavController) }
+            composable(Screen.Facts.route) { FactsScreen() }
             composable(Screen.Profile.route) {
                 ProfileScreen(
                     onLogout = {

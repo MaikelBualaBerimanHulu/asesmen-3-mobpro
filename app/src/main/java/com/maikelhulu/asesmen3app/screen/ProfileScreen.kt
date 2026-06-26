@@ -88,18 +88,9 @@ fun ProfileScreen(onLogout: () -> Unit) {
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-            StatCard("API", remoteCount.toString(), Modifier.weight(1f))
-            StatCard("Lokal", localCount.toString(), Modifier.weight(1f))
+            StatCard("Jelajah", remoteCount.toString(), Modifier.weight(1f))
+            StatCard("Koleksi", localCount.toString(), Modifier.weight(1f))
             StatCard("Favorit", favoriteCount.toString(), Modifier.weight(1f))
-        }
-
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Fitur Penilaian", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                Text("Login tersimpan dengan DataStore", style = MaterialTheme.typography.titleMedium)
-                Text("REST API + gambar tersimpan offline di Room", style = MaterialTheme.typography.titleMedium)
-                Text("CRUD lokal: tambah, edit, hapus, favorit", style = MaterialTheme.typography.titleMedium)
-            }
         }
 
         Spacer(Modifier.weight(1f))

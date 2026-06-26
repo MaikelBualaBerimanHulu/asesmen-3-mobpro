@@ -52,7 +52,7 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
         Text("MyCollection", style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(12.dp))
         Text(
-            "Masuk untuk melihat explore, koleksi offline, dan profil pengguna.",
+            "Temukan foto menarik dan simpan yang paling kamu suka.",
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

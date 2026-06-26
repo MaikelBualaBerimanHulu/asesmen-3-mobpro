@@ -9,6 +9,7 @@ import com.maikelhulu.asesmen3app.model.ApiItem
 import com.maikelhulu.asesmen3app.model.ApiStatus
 import com.maikelhulu.asesmen3app.model.Item
 import com.maikelhulu.asesmen3app.network.RetrofitInstance
+import com.maikelhulu.asesmen3app.util.catNameFor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,6 +35,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _apiStatus.value = ApiStatus.LOADING
             try {
+                cleanOldRemoteCopy()
                 val remoteItems = RetrofitInstance.api.getItems(limit = 20)
 
                 val localItems = remoteItems.map { apiItem ->
@@ -44,8 +46,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         height = apiItem.height,
                         isLocal = false,
                         userId = userId,
-                        title = "Explore ${apiItem.id.take(6).uppercase()}",
-                        description = "Foto dari The Cat API. Data tersimpan di Room agar tetap bisa dibuka ulang.",
+                        title = catNameFor(apiItem.id),
+                        description = "",
                         createdAt = System.currentTimeMillis(),
                         updatedAt = System.currentTimeMillis()
                     )
@@ -64,6 +66,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun observeItems(userId: String) {
         viewModelScope.launch {
+            cleanOldRemoteCopy()
             itemDao.getItemsByUser(userId).collect { list ->
                 _items.value = list
             }
@@ -126,6 +129,36 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 updatedAt = now
             )
             itemDao.insertItem(newItem)
+        }
+    }
+
+    fun saveRemoteToCollection(userId: String, item: Item) {
+        viewModelScope.launch {
+            val now = System.currentTimeMillis()
+            val collectionItem = item.copy(
+                id = UUID.randomUUID().toString(),
+                isLocal = true,
+                userId = userId,
+                title = item.displayTitle(),
+                description = item.description,
+                isFavorite = false,
+                createdAt = now,
+                updatedAt = now
+            )
+            itemDao.insertItem(collectionItem)
+        }
+    }
+
+    private suspend fun cleanOldRemoteCopy() {
+        itemDao.cleanOldRemoteTitles()
+        itemDao.cleanOldRemoteDescriptions()
+    }
+
+    private fun Item.displayTitle(): String {
+        return if (!isLocal && (title.startsWith("Explore ", ignoreCase = true) || title.equals("Foto pilihan", ignoreCase = true))) {
+            catNameFor(id)
+        } else {
+            title.ifBlank { catNameFor(id) }
         }
     }
 }
